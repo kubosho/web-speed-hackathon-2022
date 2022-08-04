@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "author": "dora <31735614+dora1998@users.noreply.github.com>",
   "scripts": {
-    "build": "webpack",
+    "build": "npx mkdirp ./dist && yarn create_banks_json && webpack",
     "build:watch": "yarn build --watch --progress",
     "serve": "node dist/server.js",
     "serve:dev": "wait-on dist/server.js && NODE_OPTIONS=--enable-source-maps nodemon dist/server.js",
@@ -18,7 +18,8 @@
     "lint:eslint:fix": "eslint --ext '.mjs,.js,.jsx' --fix .",
     "lint:stylelint": "stylelint --ignore-path .gitignore './**/*.css' './**/*.jsx'",
     "lint:stylelint:fix": "stylelint --ignore-path .gitignore --fix './**/*.css' './**/*.jsx'",
-    "bundle_analyze": "NODE_ENV=production ENABLE_BUNDLE_ANALYZE=true webpack --config webpack.config.js"
+    "bundle_analyze": "NODE_ENV=production ENABLE_BUNDLE_ANALYZE=true webpack --config webpack.config.js",
+    "create_banks_json": "node ./tools/banks_builder.js"
   },
   "devDependencies": {
     "@babel/core": "^7.16.7",

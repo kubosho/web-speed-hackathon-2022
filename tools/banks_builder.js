@@ -13,12 +13,7 @@ const OUTPUT_FILE = "banks.json";
 const DESTINATION_FILE = `${DIST_DIR}/${OUTPUT_FILE}`;
 
 function getBanks() {
-  const bankList = Object.entries(zenginCode).map(([code, { name }]) => ({
-    code,
-    name,
-  }));
-
-  return bankList;
+  return zenginCode;
 }
 
 async function main() {
