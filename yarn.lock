@@ -5687,6 +5687,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lodash.sortby@npm:^4.7.0":
+  version: 4.7.0
+  resolution: "lodash.sortby@npm:4.7.0"
+  checksum: db170c9396d29d11fe9a9f25668c4993e0c1331bcb941ddbd48fb76f492e732add7f2a47cfdf8e9d740fa59ac41bbfaf931d268bc72aab3ab49e9f89354d718c
+  languageName: node
+  linkType: hard
+
 "lodash.truncate@npm:^4.4.2":
   version: 4.4.2
   resolution: "lodash.truncate@npm:4.4.2"
@@ -9204,6 +9211,7 @@ __metadata:
     fastify-static: ^4.5.0
     framer-motion: ^6.2.8
     lodash: ^4.17.21
+    lodash.sortby: ^4.7.0
     modern-css-reset: ^1.4.0
     nodemon: ^2.0.15
     npm-run-all: ^4.1.5
