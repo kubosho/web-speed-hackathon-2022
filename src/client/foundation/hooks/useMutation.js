@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useCallback, useState } from "react";
 
 import { useAuth } from "../contexts/AuthContext";
@@ -44,20 +43,19 @@ export function useMutation(apiPath, { auth, method }) {
       }));
 
       try {
-        const res = await axios.request({
-          data,
-          headers: auth
-            ? {
-                "x-app-userid": userId,
-              }
-            : {},
-          method,
-          url: apiPath,
-        });
+        const headers = new Headers();
+        headers.append("Content-Type", "application/json");
+        if (auth) {
+          headers.append("X-App-Userid", userId);
+        }
+        const body = JSON.stringify(data);
+        const req = new Request(apiPath, { body, headers, method });
+        const res = await fetch(req);
+        const resData = res.status !== 200 ? "" : res.json();
 
         setResult((cur) => ({
           ...cur,
-          data: res.data,
+          data: resData,
           loading: false,
         }));
       } catch (error) {
