@@ -13,12 +13,16 @@ const PUBLIC_ROOT = abs("./public");
 const DIST_ROOT = abs("./dist");
 const DIST_PUBLIC = abs("./dist/public");
 
+const DEVTOOL =
+  process.env.NODE_ENV === "production" ? false : "inline-source-map";
+const MODE = "production";
+
 /** @type {Array<import('webpack').Configuration>} */
 module.exports = [
   {
-    devtool: "inline-source-map",
+    devtool: DEVTOOL,
     entry: path.join(SRC_ROOT, "client/index.jsx"),
-    mode: "development",
+    mode: MODE,
     module: {
       rules: [
         {
@@ -64,10 +68,10 @@ module.exports = [
     target: "web",
   },
   {
-    devtool: "inline-source-map",
+    devtool: DEVTOOL,
     entry: path.join(SRC_ROOT, "server/index.js"),
     externals: [nodeExternals()],
-    mode: "development",
+    mode: MODE,
     module: {
       rules: [
         {
@@ -92,6 +96,9 @@ module.exports = [
       ],
     },
     name: "server",
+    optimization: {
+      minimize: false,
+    },
     output: {
       filename: "server.js",
       path: DIST_ROOT,
