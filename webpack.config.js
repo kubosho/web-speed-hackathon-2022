@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require("path");
 
+const CompressionPlugin = require("compression-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
+const zopfli = require("node-zopfli");
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 const nodeExternals = require("webpack-node-externals");
 
@@ -52,6 +54,12 @@ module.exports = [
     plugins: [
       new CopyPlugin({
         patterns: [{ from: PUBLIC_ROOT, to: DIST_PUBLIC }],
+      }),
+      new CompressionPlugin({
+        algorithm(input, compressionOptions, callback) {
+          return zopfli.gzip(input, compressionOptions, callback);
+        },
+        test: /\.(jsx?)$/,
       }),
       ...(process.env.ENABLE_BUNDLE_ANALYZE
         ? [
