@@ -1,3 +1,6 @@
+import fs from "fs/promises";
+import path from "path";
+
 import dayjs from "dayjs";
 import { Between, LessThanOrEqual, MoreThanOrEqual } from "typeorm";
 
@@ -120,6 +123,15 @@ export const apiRoute = async (fastify) => {
     res.send({
       bettingTickets,
     });
+  });
+
+  fastify.get("/banks", async (_req, res) => {
+    const baseDir = path.join(__dirname, "..");
+    const distDir = `${baseDir}/dist`;
+    const bankList = await fs.readFile(`${distDir}/banks.json`, "utf8");
+
+    res.type("application/json");
+    res.send(bankList);
   });
 
   fastify.post("/races/:raceId/betting-tickets", async (req, res) => {
