@@ -48,6 +48,28 @@ module.exports = [
       ],
     },
     name: "client",
+    optimization: {
+      splitChunks: {
+        cacheGroups: {
+          framework: {
+            chunks: "all",
+            name: "framework",
+            priority: 60,
+            test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+          },
+          vendor: {
+            chunks: "all",
+            name: "vendor",
+            priority: 30,
+            reuseExistingChunk: true,
+            test: (module) => {
+              return module.context && module.context.includes("node_modules");
+            },
+          },
+        },
+        maxInitialRequests: 20,
+      },
+    },
     output: {
       path: DIST_PUBLIC,
     },
