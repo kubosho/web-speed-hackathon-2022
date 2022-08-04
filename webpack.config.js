@@ -2,6 +2,7 @@
 const path = require("path");
 
 const CopyPlugin = require("copy-webpack-plugin");
+const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 const nodeExternals = require("webpack-node-externals");
 
 function abs(...args) {
@@ -58,6 +59,14 @@ module.exports = [
       new CopyPlugin({
         patterns: [{ from: PUBLIC_ROOT, to: DIST_PUBLIC }],
       }),
+      ...(process.env.ENABLE_BUNDLE_ANALYZE
+        ? [
+            new BundleAnalyzerPlugin({
+              generateStatsFile: true,
+              openAnalyzer: false,
+            }),
+          ]
+        : []),
     ],
     resolve: {
       extensions: [".js", ".jsx"],
