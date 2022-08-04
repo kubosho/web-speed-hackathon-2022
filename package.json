@@ -60,7 +60,6 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.17.2",
-    "axios": "^0.25.0",
     "bezier-easing": "^2.1.0",
     "dayjs": "^1.11.4",
     "fastify": "^3.25.3",
