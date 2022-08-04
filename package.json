@@ -82,6 +82,6 @@
     "zengin-code": "^1.0.0-p20220130"
   },
   "engines": {
-    "node": "16.x.x"
+    "node": "18.x.x"
   }
 }
