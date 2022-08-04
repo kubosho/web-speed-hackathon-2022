@@ -73,5 +73,5 @@ export const TrimmedImage = ({ height, src, width }) => {
     };
   }, [height, src, width]);
 
-  return <img ref={ref} alt="" src={dataUrl} />;
+  return <img ref={ref} alt="" loading="lazy" src={dataUrl} />;
 };
