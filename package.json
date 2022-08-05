@@ -70,7 +70,6 @@
     "bezier-easing": "^2.1.0",
     "dayjs": "^1.11.4",
     "fastify": "^4.3.0",
-    "framer-motion": "^6.2.8",
     "lodash.sortby": "^4.7.0",
     "modern-css-reset": "^1.4.0",
     "pino-pretty": "^7.3.0",
