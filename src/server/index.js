@@ -38,7 +38,6 @@ server.addHook("onRequest", async (req, res) => {
 });
 
 server.addHook("onRequest", async (req, res) => {
-  res.header("Cache-Control", "no-cache, private");
   res.header("Connection", "keep-alive");
 });
 

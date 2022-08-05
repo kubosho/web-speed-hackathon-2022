@@ -16,6 +16,7 @@ export const apiRoute = async (fastify) => {
   fastify.get("/users/me", async (req, res) => {
     const repo = (await createConnection()).getRepository(User);
 
+    res.header("Cache-Control", "private");
     if (req.user != null) {
       res.send(req.user);
     } else {
@@ -39,6 +40,7 @@ export const apiRoute = async (fastify) => {
     req.user.balance += amount;
     await repo.save(req.user);
 
+    res.header("Cache-Control", "no-store");
     res.status(204).send();
   });
 
@@ -46,6 +48,7 @@ export const apiRoute = async (fastify) => {
     const url = assets("/images/hero.jpg");
     const hash = "";
 
+    res.header("Cache-Control", "max-age=2678400");
     res.send({ hash, url });
   });
 
@@ -86,6 +89,7 @@ export const apiRoute = async (fastify) => {
       where,
     });
 
+    res.header("Cache-Control", "max-age=86400");
     res.send({ races });
   });
 
@@ -100,6 +104,7 @@ export const apiRoute = async (fastify) => {
       throw fastify.httpErrors.notFound();
     }
 
+    res.header("Cache-Control", "max-age=86400");
     res.send(race);
   });
 
@@ -120,6 +125,7 @@ export const apiRoute = async (fastify) => {
       },
     });
 
+    res.header("Cache-Control", "max-age=86400");
     res.send({
       bettingTickets,
     });
@@ -130,6 +136,7 @@ export const apiRoute = async (fastify) => {
     const distDir = `${baseDir}/dist`;
     const bankList = await fs.readFile(`${distDir}/banks.json`, "utf8");
 
+    res.header("Cache-Control", "max-age=2678400");
     res.type("application/json");
     res.send(bankList);
   });
@@ -174,11 +181,13 @@ export const apiRoute = async (fastify) => {
     req.user.balance -= 100;
     await userRepo.save(req.user);
 
+    res.header("Cache-Control", "no-store");
     res.send(bettingTicket);
   });
 
   fastify.post("/initialize", async (_req, res) => {
     await initialize();
+    res.header("Cache-Control", "no-store");
     res.status(204).send();
   });
 };
