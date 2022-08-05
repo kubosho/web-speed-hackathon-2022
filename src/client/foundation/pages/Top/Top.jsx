@@ -1,9 +1,9 @@
 import dayjs from "dayjs";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import React, { useCallback, useMemo, useRef } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 
-import { difference } from "../../../../utils/difference";
 import { Container } from "../../components/layouts/Container";
 import { Spacer } from "../../components/layouts/Spacer";
 import { Stack } from "../../components/layouts/Stack";
@@ -11,71 +11,13 @@ import { Heading } from "../../components/typographies/Heading";
 import { useAuthorizedFetch } from "../../hooks/useAuthorizedFetch";
 import { useFetch } from "../../hooks/useFetch";
 import { Color, Radius, Space } from "../../styles/variables";
-import { isSameDay } from "../../utils/DateUtils";
 import { authorizedJsonFetcher, jsonFetcher } from "../../utils/HttpUtils";
 
 import { ChargeDialog } from "./internal/ChargeDialog";
 import { HeroImage } from "./internal/HeroImage";
 import { RecentRaceList } from "./internal/RecentRaceList";
 
-/**
- * @param {Model.Race[]} races
- * @returns {Model.Race[]}
- */
-function useTodayRacesWithAnimation(races) {
-  const [isRacesUpdate, setIsRacesUpdate] = useState(false);
-  const [racesToShow, setRacesToShow] = useState([]);
-  const numberOfRacesToShow = useRef(0);
-  const prevRaces = useRef(races);
-  const timer = useRef(null);
-
-  useEffect(() => {
-    const isRacesUpdate =
-      difference(
-        races.map((e) => e.id),
-        prevRaces.current.map((e) => e.id),
-      ).length !== 0;
-
-    prevRaces.current = races;
-    setIsRacesUpdate(isRacesUpdate);
-  }, [races]);
-
-  useEffect(() => {
-    if (!isRacesUpdate) {
-      return;
-    }
-    // 視覚効果 off のときはアニメーションしない
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setRacesToShow(races);
-      return;
-    }
-
-    numberOfRacesToShow.current = 0;
-    if (timer.current !== null) {
-      clearInterval(timer.current);
-    }
-
-    timer.current = setInterval(() => {
-      if (numberOfRacesToShow.current >= races.length) {
-        clearInterval(timer.current);
-        return;
-      }
-
-      numberOfRacesToShow.current++;
-      setRacesToShow(races.slice(0, numberOfRacesToShow.current));
-    }, 100);
-  }, [isRacesUpdate, races]);
-
-  useEffect(() => {
-    return () => {
-      if (timer.current !== null) {
-        clearInterval(timer.current);
-      }
-    };
-  }, []);
-
-  return racesToShow;
-}
+dayjs.extend(customParseFormat);
 
 /** @type {React.VFC} */
 export const Top = () => {
@@ -99,7 +41,12 @@ export const Top = () => {
     authorizedJsonFetcher,
   );
 
-  const { data: raceData } = useFetch("/api/races", jsonFetcher);
+  const since = dayjs(date).startOf("day").unix();
+  const until = dayjs(date).endOf("day").unix();
+  const { data: raceData } = useFetch(
+    `/api/races?since=${since}&until=${until}`,
+    jsonFetcher,
+  );
 
   const handleClickChargeButton = useCallback(() => {
     if (chargeDialogRef.current === null) {
@@ -113,18 +60,10 @@ export const Top = () => {
     revalidate();
   }, [revalidate]);
 
-  const todayRaces =
-    raceData != null
-      ? [...raceData.races]
-          .sort(
-            (/** @type {Model.Race} */ a, /** @type {Model.Race} */ b) =>
-              dayjs(a.startAt) - dayjs(b.startAt),
-          )
-          .filter((/** @type {Model.Race} */ race) =>
-            isSameDay(race.startAt, date),
-          )
-      : [];
-  const todayRacesToShow = useTodayRacesWithAnimation(todayRaces);
+  const todayRaces = useMemo(
+    () => (raceData != null ? raceData.races : []),
+    [raceData],
+  );
 
   return (
     <Container>
@@ -152,9 +91,9 @@ export const Top = () => {
       <Spacer mt={Space * 2} />
       <section>
         <Heading as="h1">本日のレース</Heading>
-        {todayRacesToShow.length > 0 && (
+        {todayRaces.length > 0 && (
           <RecentRaceList>
-            {todayRacesToShow.map((race) => (
+            {todayRaces.map((race) => (
               <RecentRaceList.Item key={race.id} race={race} />
             ))}
           </RecentRaceList>
