@@ -1,6 +1,6 @@
 import { join } from "path";
 
-import fastifyStatic from "fastify-static";
+import fastifyStatic from "@fastify/static";
 
 /**
  * @type {import('fastify').FastifyPluginCallback}
