@@ -2,11 +2,14 @@ import fs from "fs/promises";
 import path from "path";
 
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 import { Between, LessThanOrEqual, MoreThanOrEqual } from "typeorm";
 
 import { BettingTicket, Race, User } from "../../model/index.js";
 import { createConnection } from "../typeorm/connection.js";
 import { initialize } from "../typeorm/initialize.js";
+
+dayjs.extend(utc);
 
 /**
  * @type {import('fastify').FastifyPluginCallback}
@@ -44,10 +47,9 @@ export const apiRoute = async (fastify) => {
   });
 
   fastify.get("/races", { compress: false }, async (req, res) => {
-    const since =
-      req.query.since != null ? dayjs.unix(req.query.since) : undefined;
-    const until =
-      req.query.until != null ? dayjs.unix(req.query.until) : undefined;
+    const { since: s, until: u } = req.query;
+    const since = s != null ? dayjs(s * 1000) : undefined;
+    const until = u != null ? dayjs(u * 1000) : undefined;
 
     if (since != null && !since.isValid()) {
       throw fastify.httpErrors.badRequest();
@@ -77,6 +79,7 @@ export const apiRoute = async (fastify) => {
     }
 
     const races = await repo.find({
+      order: { startAt: "ASC" },
       where,
     });
 
