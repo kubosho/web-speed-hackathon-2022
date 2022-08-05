@@ -13,7 +13,7 @@ import { initialize } from "../typeorm/initialize.js";
  * @type {import('fastify').FastifyPluginCallback}
  */
 export const apiRoute = async (fastify) => {
-  fastify.get("/users/me", async (req, res) => {
+  fastify.get("/users/me", { compress: false }, async (req, res) => {
     const repo = (await createConnection()).getRepository(User);
 
     res.header("Cache-Control", "private");
@@ -25,7 +25,7 @@ export const apiRoute = async (fastify) => {
     }
   });
 
-  fastify.post("/users/me/charge", async (req, res) => {
+  fastify.post("/users/me/charge", { compress: false }, async (req, res) => {
     if (req.user == null) {
       throw fastify.httpErrors.unauthorized();
     }
@@ -52,7 +52,7 @@ export const apiRoute = async (fastify) => {
     res.send({ hash, url });
   });
 
-  fastify.get("/races", async (req, res) => {
+  fastify.get("/races", { compress: false }, async (req, res) => {
     const since =
       req.query.since != null ? dayjs.unix(req.query.since) : undefined;
     const until =
@@ -93,7 +93,7 @@ export const apiRoute = async (fastify) => {
     res.send({ races });
   });
 
-  fastify.get("/races/:raceId", async (req, res) => {
+  fastify.get("/races/:raceId", { compress: false }, async (req, res) => {
     const repo = (await createConnection()).getRepository(Race);
 
     const race = await repo.findOne(req.params.raceId, {
@@ -108,30 +108,34 @@ export const apiRoute = async (fastify) => {
     res.send(race);
   });
 
-  fastify.get("/races/:raceId/betting-tickets", async (req, res) => {
-    if (req.user == null) {
-      throw fastify.httpErrors.unauthorized();
-    }
+  fastify.get(
+    "/races/:raceId/betting-tickets",
+    { compress: false },
+    async (req, res) => {
+      if (req.user == null) {
+        throw fastify.httpErrors.unauthorized();
+      }
 
-    const repo = (await createConnection()).getRepository(BettingTicket);
-    const bettingTickets = await repo.find({
-      where: {
-        race: {
-          id: req.params.raceId,
+      const repo = (await createConnection()).getRepository(BettingTicket);
+      const bettingTickets = await repo.find({
+        where: {
+          race: {
+            id: req.params.raceId,
+          },
+          user: {
+            id: req.user.id,
+          },
         },
-        user: {
-          id: req.user.id,
-        },
-      },
-    });
+      });
 
-    res.header("Cache-Control", "max-age=86400");
-    res.send({
-      bettingTickets,
-    });
-  });
+      res.header("Cache-Control", "max-age=86400");
+      res.send({
+        bettingTickets,
+      });
+    },
+  );
 
-  fastify.get("/banks", async (_req, res) => {
+  fastify.get("/banks", { compress: false }, async (_req, res) => {
     const baseDir = path.join(__dirname, "..");
     const distDir = `${baseDir}/dist`;
     const bankList = await fs.readFile(`${distDir}/banks.json`, "utf8");
@@ -141,51 +145,55 @@ export const apiRoute = async (fastify) => {
     res.send(bankList);
   });
 
-  fastify.post("/races/:raceId/betting-tickets", async (req, res) => {
-    if (req.user == null) {
-      throw fastify.httpErrors.unauthorized();
-    }
+  fastify.post(
+    "/races/:raceId/betting-tickets",
+    { compress: false },
+    async (req, res) => {
+      if (req.user == null) {
+        throw fastify.httpErrors.unauthorized();
+      }
 
-    if (req.user.balance < 100) {
-      throw fastify.httpErrors.preconditionFailed();
-    }
+      if (req.user.balance < 100) {
+        throw fastify.httpErrors.preconditionFailed();
+      }
 
-    if (typeof req.body.type !== "string") {
-      throw fastify.httpErrors.badRequest();
-    }
+      if (typeof req.body.type !== "string") {
+        throw fastify.httpErrors.badRequest();
+      }
 
-    if (
-      !Array.isArray(req.body.key) ||
-      req.body.key.some((n) => typeof n !== "number")
-    ) {
-      throw fastify.httpErrors.badRequest();
-    }
+      if (
+        !Array.isArray(req.body.key) ||
+        req.body.key.some((n) => typeof n !== "number")
+      ) {
+        throw fastify.httpErrors.badRequest();
+      }
 
-    const bettingTicketRepo = (await createConnection()).getRepository(
-      BettingTicket,
-    );
-    const bettingTicket = await bettingTicketRepo.save(
-      new BettingTicket({
-        key: req.body.key,
-        race: {
-          id: req.params.raceId,
-        },
-        type: req.body.type,
-        user: {
-          id: req.user.id,
-        },
-      }),
-    );
+      const bettingTicketRepo = (await createConnection()).getRepository(
+        BettingTicket,
+      );
+      const bettingTicket = await bettingTicketRepo.save(
+        new BettingTicket({
+          key: req.body.key,
+          race: {
+            id: req.params.raceId,
+          },
+          type: req.body.type,
+          user: {
+            id: req.user.id,
+          },
+        }),
+      );
 
-    const userRepo = (await createConnection()).getRepository(User);
-    req.user.balance -= 100;
-    await userRepo.save(req.user);
+      const userRepo = (await createConnection()).getRepository(User);
+      req.user.balance -= 100;
+      await userRepo.save(req.user);
 
-    res.header("Cache-Control", "no-store");
-    res.send(bettingTicket);
-  });
+      res.header("Cache-Control", "no-store");
+      res.send(bettingTicket);
+    },
+  );
 
-  fastify.post("/initialize", async (_req, res) => {
+  fastify.post("/initialize", { compress: false }, async (_req, res) => {
     await initialize();
     res.header("Cache-Control", "no-store");
     res.status(204).send();
