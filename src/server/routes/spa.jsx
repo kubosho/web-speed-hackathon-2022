@@ -38,8 +38,7 @@ export const spaRoute = async (fastify) => {
       const style = sheet.getStyleTags();
       const metaString = renderToString(<Meta />);
       const scriptString = renderToString(<Script />);
-      const htmlString = `
-        <!DOCTYPE html>
+      const htmlString = `<!DOCTYPE html>
           <html>
             <head>
               ${metaString}
