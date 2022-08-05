@@ -71,7 +71,6 @@
     "dayjs": "^1.11.4",
     "fastify": "^4.3.0",
     "lodash.sortby": "^4.7.0",
-    "modern-css-reset": "^1.4.0",
     "pino-pretty": "^7.3.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

@@ -43,7 +43,6 @@ export const spaRoute = async (fastify) => {
           <html>
             <head>
               ${metaString}
-              <link rel="stylesheet" href="https://unpkg.com/modern-css-reset/dist/reset.min.css" />
               ${style}
               ${scriptString}
             </head>
