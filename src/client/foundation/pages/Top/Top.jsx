@@ -145,11 +145,15 @@ export const Top = () => {
           )
       : [];
   const todayRacesToShow = useTodayRacesWithAnimation(todayRaces);
-  const heroImageUrl = useHeroImage(todayRaces);
 
   return (
     <Container>
-      {heroImageUrl !== null && <HeroImage url={heroImageUrl} />}
+      <HeroImage
+        alt=""
+        height="735"
+        src="/assets/images/hero.jpg"
+        width="1024"
+      />
 
       <Spacer mt={Space * 2} />
       {userData && (
