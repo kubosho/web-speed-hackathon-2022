@@ -1,9 +1,10 @@
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 
+import { difference } from "../../../../utils/difference";
 import { Container } from "../../components/layouts/Container";
 import { Spacer } from "../../components/layouts/Spacer";
 import { Stack } from "../../components/layouts/Stack";
@@ -18,6 +19,65 @@ import { HeroImage } from "./internal/HeroImage";
 import { RecentRaceList } from "./internal/RecentRaceList";
 
 dayjs.extend(customParseFormat);
+
+/**
+ * @param {Model.Race[]} races
+ * @returns {Model.Race[]}
+ */
+function useTodayRacesWithAnimation(races) {
+  const [isRacesUpdate, setIsRacesUpdate] = useState(false);
+  const [racesToShow, setRacesToShow] = useState([]);
+  const numberOfRacesToShow = useRef(0);
+  const prevRaces = useRef(races);
+  const timer = useRef(null);
+
+  useEffect(() => {
+    const isRacesUpdate =
+      difference(
+        races.map((e) => e.id),
+        prevRaces.current.map((e) => e.id),
+      ).length !== 0;
+
+    prevRaces.current = races;
+    setIsRacesUpdate(isRacesUpdate);
+  }, [races]);
+
+  useEffect(() => {
+    if (!isRacesUpdate) {
+      return;
+    }
+    // 視覚効果 off のときはアニメーションしない
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setRacesToShow(races);
+      return;
+    }
+
+    numberOfRacesToShow.current = 0;
+    if (timer.current !== null) {
+      clearInterval(timer.current);
+    }
+
+    timer.current = setInterval(() => {
+      if (numberOfRacesToShow.current >= races.length) {
+        clearInterval(timer.current);
+        return;
+      }
+
+      numberOfRacesToShow.current++;
+      setRacesToShow(races.slice(0, numberOfRacesToShow.current));
+    }, 100);
+  }, [isRacesUpdate, races]);
+
+  useEffect(() => {
+    return () => {
+      if (timer.current !== null) {
+        clearInterval(timer.current);
+      }
+    };
+  }, []);
+
+  return racesToShow;
+}
 
 /** @type {React.VFC} */
 export const Top = () => {
@@ -60,10 +120,8 @@ export const Top = () => {
     revalidate();
   }, [revalidate]);
 
-  const todayRaces = useMemo(
-    () => (raceData != null ? raceData.races : []),
-    [raceData],
-  );
+  const todayRaces = raceData != null ? raceData.races : [];
+  const todayRacesToShow = useTodayRacesWithAnimation(todayRaces);
 
   return (
     <Container>
@@ -91,9 +149,9 @@ export const Top = () => {
       <Spacer mt={Space * 2} />
       <section>
         <Heading as="h1">本日のレース</Heading>
-        {todayRaces.length > 0 && (
+        {todayRacesToShow.length > 0 && (
           <RecentRaceList>
-            {todayRaces.map((race) => (
+            {todayRacesToShow.map((race) => (
               <RecentRaceList.Item key={race.id} race={race} />
             ))}
           </RecentRaceList>
