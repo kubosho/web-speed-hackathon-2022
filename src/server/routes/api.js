@@ -44,14 +44,6 @@ export const apiRoute = async (fastify) => {
     res.status(204).send();
   });
 
-  fastify.get("/hero", async (_req, res) => {
-    const url = assets("/images/hero.jpg");
-    const hash = "";
-
-    res.header("Cache-Control", "max-age=2678400");
-    res.send({ hash, url });
-  });
-
   fastify.get("/races", { compress: false }, async (req, res) => {
     const since =
       req.query.since != null ? dayjs.unix(req.query.since) : undefined;
